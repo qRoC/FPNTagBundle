@@ -37,4 +37,55 @@ class TagManager extends BaseTagManager
 
         return $tag;
     }
+
+    /**
+     * @see DoctrineExtensions\Taggable\TagManager::loadOrCreateTags()
+     */
+    public function loadOrCreateTags(array $names)
+    {
+        if (empty($names)) {
+            return array();
+        }
+
+        $names = $this->slugifyNames($names);
+
+        $names = array_unique($names);
+        $builder = $this->em->createQueryBuilder();
+        $tags = $builder
+            ->select('t')
+            ->from($this->tagClass, 't')
+            ->where($builder->expr()->in('t.slug', $names))
+            ->getQuery()
+            ->getResult()
+        ;
+        $loadedNames = array();
+        foreach ($tags as $tag) {
+            $loadedNames[] = $tag->getName();
+        }
+        $missingNames = array_udiff($names, $loadedNames, 'strcasecmp');
+        if (sizeof($missingNames)) {
+            foreach ($missingNames as $name) {
+                $tag = $this->createTag($name);
+                $this->em->persist($tag);
+                $tags[] = $tag;
+            }
+            $this->em->flush();
+        }
+        return $tags;
+    }
+
+    protected function slugifyNames($names)
+    {
+        $newNames = array();
+
+        foreach ($names as $name) {
+            $slug = $this->slugifier->slugify($name);
+
+            if (!in_array($slug, $newNames)) {
+                $newNames[] = $slug;
+            }
+        }
+
+        return $newNames;
+    }
 }
