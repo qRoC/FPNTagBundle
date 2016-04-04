@@ -12,7 +12,7 @@ namespace FPN\TagBundle\Entity;
 
 use DoctrineExtensions\Taggable\TagManager as BaseTagManager;
 use Doctrine\ORM\EntityManager;
-use FPN\TagBundle\Util\SlugifierInterface;
+use Cocur\Slugify\Slugify;
 
 class TagManager extends BaseTagManager
 {
@@ -21,10 +21,10 @@ class TagManager extends BaseTagManager
     /**
      * @see DoctrineExtensions\Taggable\TagManager::__construct()
      */
-    public function __construct(EntityManager $em, $tagClass = null, $taggingClass = null, SlugifierInterface $slugifier)
+    public function __construct(EntityManager $em, $tagClass = null, $taggingClass = null)
     {
         parent::__construct($em, $tagClass, $taggingClass);
-        $this->slugifier = $slugifier;
+        $this->slugifier = new Slugify();
     }
 
     /**
@@ -67,7 +67,7 @@ class TagManager extends BaseTagManager
             foreach ($missingNames as $name) {
                 $tag = $this->createTag($name);
                 $this->em->persist($tag);
-                $tags[] = $tag;
+                $tags[] = $tag;4
             }
             $this->em->flush();
         }
