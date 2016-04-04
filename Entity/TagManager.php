@@ -47,14 +47,14 @@ class TagManager extends BaseTagManager
             return array();
         }
 
-        $names = $this->slugifyNames($names);
-
         $names = array_unique($names);
+        $slugs = $this->slugifyNames($names);
+
         $builder = $this->em->createQueryBuilder();
         $tags = $builder
             ->select('t')
             ->from($this->tagClass, 't')
-            ->where($builder->expr()->in('t.slug', $names))
+            ->where($builder->expr()->in('t.slug', $slugs))
             ->getQuery()
             ->getResult()
         ;
