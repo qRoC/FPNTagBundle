@@ -67,7 +67,7 @@ class TagManager extends BaseTagManager
             foreach ($missingNames as $name) {
                 $tag = $this->createTag($name);
                 $this->em->persist($tag);
-                $tags[] = $tag;4
+                $tags[] = $tag;
             }
             $this->em->flush();
         }
