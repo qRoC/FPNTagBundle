@@ -17,6 +17,7 @@ use Cocur\Slugify\Slugify;
 class TagManager extends BaseTagManager
 {
     protected $slugifier;
+    protected $namesBySlug;
 
     /**
      * @see DoctrineExtensions\Taggable\TagManager::__construct()
@@ -58,14 +59,15 @@ class TagManager extends BaseTagManager
             ->getQuery()
             ->getResult()
         ;
-        $loadedNames = array();
+        $loadedSlugs = $namesForSlugs = array();
         foreach ($tags as $tag) {
-            $loadedNames[] = $tag->getName();
+            $loadedSlugs[] = $tag->getSlug();
+            $namesForSlugs[$tag->getSlug()] = $tag->getName();
         }
-        $missingNames = array_udiff($names, $loadedNames, 'strcasecmp');
-        if (sizeof($missingNames)) {
-            foreach ($missingNames as $name) {
-                $tag = $this->createTag($name);
+        $missingSlugs = array_udiff($slugs, $loadedSlugs, 'strcasecmp');
+        if (sizeof($missingSlugs)) {
+            foreach ($missingSlugs as $slug) {
+                $tag = $this->createTag($this->namesBySlug[$slug]);
                 $this->em->persist($tag);
                 $tags[] = $tag;
             }
@@ -83,6 +85,7 @@ class TagManager extends BaseTagManager
 
             if (!in_array($slug, $newNames)) {
                 $newNames[] = $slug;
+                $this->namesBySlug[$slug] = $name;
             }
         }
 
