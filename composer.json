@@ -12,7 +12,8 @@
     ],
     "require": {
         "symfony/framework-bundle": ">=2.0",
-        "fpn/doctrine-extensions-taggable": "dev-master"
+        "fpn/doctrine-extensions-taggable": "dev-master",
+        "cocur/slugify": "^2.1"
     },
     "autoload": {
         "psr-0": {
