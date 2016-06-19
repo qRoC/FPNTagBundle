@@ -30,7 +30,7 @@ class TagManager extends BaseTagManager
     public function __construct(EntityManager $em, $tagClass = null, $taggingClass = null, SlugifyInterface $slugify)
     {
         parent::__construct($em, $tagClass, $taggingClass);
-        $this->slugifier = $slugify);
+        $this->slugifier = $slugify;
     }
 
     /**
