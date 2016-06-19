@@ -13,19 +13,24 @@ namespace FPN\TagBundle\Entity;
 use DoctrineExtensions\Taggable\TagManager as BaseTagManager;
 use Doctrine\ORM\EntityManager;
 use Cocur\Slugify\Slugify;
+use Cocur\Slugify\SlugifyInterface;
 
 class TagManager extends BaseTagManager
 {
+    /**
+     * @var SlugifyInterface
+     */
     protected $slugifier;
+    
     protected $namesBySlug;
 
     /**
      * @see DoctrineExtensions\Taggable\TagManager::__construct()
      */
-    public function __construct(EntityManager $em, $tagClass = null, $taggingClass = null)
+    public function __construct(EntityManager $em, $tagClass = null, $taggingClass = null, SlugifyInterface $slugify)
     {
         parent::__construct($em, $tagClass, $taggingClass);
-        $this->slugifier = new Slugify();
+        $this->slugifier = $slugify);
     }
 
     /**
@@ -64,7 +69,12 @@ class TagManager extends BaseTagManager
             $loadedSlugs[] = $tag->getSlug();
             $namesForSlugs[$tag->getSlug()] = $tag->getName();
         }
-        $missingSlugs = array_udiff($slugs, $loadedSlugs, 'strcasecmp');
+        
+        $missingSlugs = array_udiff($slugs, $loadedSlugs, function($str1, $str2)
+        {
+            return strcmp(mb_strtolower($str1, 'UTF8'), mb_strtolower($str2, 'UTF8'));
+        });
+        
         if (sizeof($missingSlugs)) {
             foreach ($missingSlugs as $slug) {
                 $tag = $this->createTag($this->namesBySlug[$slug]);
